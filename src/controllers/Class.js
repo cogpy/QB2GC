@@ -1,10 +1,22 @@
 import { PrismaClient } from '@prisma/client';
 import grpc from '@grpc/grpc-js';
 import { getQuickBooksInstance } from '../QBInstance.js';
+import GnuCashSyncService from '../services/GnuCashSyncService.js';
 
 const prisma = new PrismaClient({
   log: ['query', 'info', 'warn', 'error'],
 });
+
+// Initialize GnuCash sync service
+const gnucashService = new GnuCashSyncService();
+let isGnuCashInitialized = false;
+
+const ensureGnuCashInitialized = async () => {
+  if (!isGnuCashInitialized) {
+    await gnucashService.initialize();
+    isGnuCashInitialized = true;
+  }
+};
 
 export const CreateClass = async (call, callback) => {
   try {
@@ -86,7 +98,29 @@ export const CreateClass = async (call, callback) => {
 
         // 5️⃣ Response stream bhejna
         const ids = createdClasses.map((cls) => cls.id.toString());
-        call.write({ ids, message: '✅ Classes created and synced successfully' });
+        call.write({ ids, message: '✅ Classes created and synced successfully to QuickBooks' });
+        
+        // 6️⃣ Sync to GnuCash in background (non-blocking)
+        (async () => {
+          try {
+            await ensureGnuCashInitialized();
+            console.log('🔄 Starting GnuCash sync for created classes...');
+            
+            for (const cls of createdClasses) {
+              try {
+                await gnucashService.syncClassToGnuCash(cls.id);
+              } catch (gcErr) {
+                console.error(`⚠️ GnuCash sync failed for class ${cls.id}:`, gcErr.message);
+                // Don't fail the whole operation if GnuCash sync fails
+              }
+            }
+            
+            console.log('✅ GnuCash sync completed for all classes');
+          } catch (initErr) {
+            console.error('⚠️ GnuCash service initialization failed:', initErr.message);
+          }
+        })();
+        
         call.end();
       } catch (err) {
         console.error('💥 Transaction/Sync Error:', err);
@@ -95,7 +129,7 @@ export const CreateClass = async (call, callback) => {
       }
     });
 
-    // 6️⃣ Error handling
+    // 7️⃣ Error handling
     call.on('error', (err) => {
       console.error('📛 gRPC stream error:', err);
       call.write({ ids: [], message: '❌ Stream error occurred' });
