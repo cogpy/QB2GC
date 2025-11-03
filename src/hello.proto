@@ -245,3 +245,9 @@ message SyncStatisticsResponse {
   string message = 1;
   string data = 2;
 }
+
+// Note: GnuCashSyncRequest supports all entity types for flexibility.
+// When calling:
+// - SyncClassToGnuCash: only use classId field
+// - SyncAccountToGnuCash: only use accountId field
+// This design allows for future entity types without breaking changes.

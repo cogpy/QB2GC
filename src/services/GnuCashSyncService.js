@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import crypto from 'crypto';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -104,7 +105,9 @@ export class GnuCashSyncService {
    * Create GnuCash XML structure for an account
    */
   createGnuCashAccount(gcData, accountId) {
-    const guidNamespace = '00000000-0000-0000-0000-000000000000';
+    // Get root account GUID from config or use default
+    const rootAccountGuid = this.mappingConfig.gnucashConfig?.rootAccountGuid 
+      || '00000000-0000-0000-0000-000000000000';
     
     return {
       'act:name': gcData.name,
@@ -121,7 +124,7 @@ export class GnuCashSyncService {
       'act:code': gcData.code || '',
       'act:parent': {
         '@type': 'guid',
-        '#text': guidNamespace // Root account
+        '#text': rootAccountGuid
       },
       'act:slots': gcData.placeholder !== undefined ? {
         'slot': {
@@ -136,9 +139,15 @@ export class GnuCashSyncService {
   }
 
   /**
-   * Generate a GUID for GnuCash entities
+   * Generate a GUID for GnuCash entities using crypto for better uniqueness
    */
   generateGUID() {
+    // Use crypto.randomUUID if available (Node.js 14.17+)
+    if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+      return crypto.randomUUID();
+    }
+    
+    // Fallback to Math.random-based UUID v4
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
       const r = Math.random() * 16 | 0;
       const v = c === 'x' ? r : (r & 0x3 | 0x8);
