@@ -71,6 +71,10 @@ export class UniversalIntegrationService {
     const universalType = entityConfig.universalType;
     const universalTypeConfig = this.schemaRegistry.universalTypes[universalType];
 
+    if (!universalTypeConfig) {
+      throw new Error(`Universal type ${universalType} not found in schema registry`);
+    }
+
     const coreData = {};
     const extendedData = {};
 
@@ -83,7 +87,7 @@ export class UniversalIntegrationService {
         const transformedValue = this.transformValue(value, fieldConfig.type);
         
         // Determine if this is a core or extended field
-        if (universalTypeConfig.coreFields.includes(universalField)) {
+        if (universalTypeConfig.coreFields && universalTypeConfig.coreFields.includes(universalField)) {
           coreData[universalField] = transformedValue;
         } else {
           extendedData[universalField] = transformedValue;
@@ -118,14 +122,18 @@ export class UniversalIntegrationService {
         return Boolean(value);
       
       case 'decimal':
-        return parseFloat(value) || 0.0;
+        return parseFloat(value) ?? 0.0;
       
       case 'integer':
-        return parseInt(value) || 0;
+        return parseInt(value) ?? 0;
       
       case 'date':
       case 'timestamp':
-        return value instanceof Date ? value.toISOString() : new Date(value).toISOString();
+        if (value instanceof Date) {
+          return value.toISOString();
+        }
+        const date = new Date(value);
+        return !isNaN(date.getTime()) ? date.toISOString() : null;
       
       case 'address':
         return typeof value === 'object' ? value : { raw: String(value) };
@@ -384,7 +392,7 @@ export class UniversalIntegrationService {
    * Validate if a system integration is supported
    */
   isSystemSupported(systemName) {
-    return this.schemaRegistry.systems.hasOwnProperty(systemName);
+    return systemName in this.schemaRegistry.systems;
   }
 
   /**
