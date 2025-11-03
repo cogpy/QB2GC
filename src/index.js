@@ -6,6 +6,14 @@ const PROTO_PATH = './src/hello.proto';
 import {CreateTaxations,GetTaxationById,UpdateTaxations} from "./controllers/taxations.js"
 import {CreateClass} from "./controllers/Class.js"
 import { createAccount } from './controllers/Accounting.js';
+import {
+  initializeGnuCashService,
+  SyncClassToGnuCash,
+  BatchSyncClassesToGnuCash,
+  SyncAccountToGnuCash,
+  BatchSyncAccountsToGnuCash,
+  GetSyncStatistics
+} from './controllers/GnuCashSync.js';
 
 dotenv.config()
 
@@ -45,6 +53,15 @@ const idGetter = (call, callback) => {
   callback(null, { details: { name: user.name, age: user.age } });
 };
 
+// Initialize GnuCash service
+(async () => {
+  try {
+    await initializeGnuCashService();
+    console.log('✅ GnuCash Sync Service initialized');
+  } catch (error) {
+    console.error('❌ Failed to initialize GnuCash Sync Service:', error);
+  }
+})();
 
 // Create a gRPC server
 const server = new grpc.Server();
@@ -57,13 +74,28 @@ server.addService(helloPackage.TaxationService.service, {
   GetTaxationById,
   UpdateTaxations
 });
+
 server.addService(helloPackage.Accounting.service,{
   createAccount,
   CreateClass
-})
+});
+
+// Add GnuCash Sync Service
+server.addService(helloPackage.GnuCashSync.service, {
+  SyncClassToGnuCash,
+  BatchSyncClassesToGnuCash,
+  SyncAccountToGnuCash,
+  BatchSyncAccountsToGnuCash,
+  GetSyncStatistics
+});
+
 // Start the server
 server.bindAsync('127.0.0.1:50051', grpc.ServerCredentials.createInsecure(), () => {
   console.log('gRPC server running on port 50051');
-  
+  console.log('📊 Services available:');
+  console.log('  - HelloService');
+  console.log('  - TaxationService');
+  console.log('  - Accounting');
+  console.log('  - GnuCashSync');
 });
 

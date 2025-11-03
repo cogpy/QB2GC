@@ -50,6 +50,13 @@ model Taxation {
   documentNumber    String?
   remarks           String?
   isActive          Boolean          @default(true)
+  
+  // GnuCash sync tracking
+  gcSyncStatus      SyncStatus       @default(PENDING)
+  gcSyncedAt        DateTime?
+  gcAccountId       String?                    // GnuCash account ID if synced
+  gcSyncError       String?
+  
   createdAt         DateTime         @default(now())
   updatedAt         DateTime         @updatedAt
 
@@ -99,6 +106,13 @@ enum AccountStatus{
   Inactive
 }
 
+enum SyncStatus{
+  PENDING
+  IN_PROGRESS
+  SYNCED
+  FAILED
+}
+
 model Account {
   id             String        @id @default(uuid()) @db.Uuid
   holderName     String
@@ -108,6 +122,12 @@ model Account {
   balance        Float
   openedAt       DateTime
   isActive       Boolean       @default(true)
+  
+  // GnuCash sync tracking
+  gcSyncStatus   SyncStatus    @default(PENDING)
+  gcSyncedAt     DateTime?
+  gcAccountId    String?                    // GnuCash account ID if synced
+  gcSyncError    String?
   
   contactInfo    ContactInfo?  @relation(fields: [contactInfoId], references: [id])
   contactInfoId  String?       @unique @db.Uuid
@@ -167,6 +187,30 @@ model QBClass {
   versionToken     Int       @default(0)       // Maps to QB's "SyncToken" (converted to Int)
   isSparse         Boolean   @default(false)   // Maps to QB's "sparse"
 
+  // GnuCash sync tracking
+  gcSyncStatus     SyncStatus @default(PENDING)
+  gcSyncedAt       DateTime?
+  gcAccountId      String?                    // GnuCash account ID if synced
+  gcSyncError      String?
+
   createdAt        DateTime  @default(now())   // Maps to QB MetaData.CreateTime
   updatedAt        DateTime  @updatedAt        // Maps to QB MetaData.LastUpdatedTime
+}
+
+// GnuCash Sync Log for tracking all sync operations
+model GnuCashSyncLog {
+  id               String      @id @default(uuid()) @db.Uuid
+  entityType       String                        // "Class", "Account", "Taxation"
+  entityId         String                        // ID of the entity being synced
+  syncStatus       SyncStatus  @default(PENDING)
+  syncDirection    String      @default("qb_to_gc") // "qb_to_gc" or "gc_to_qb"
+  gcFilePath       String?                       // Path to GnuCash file synced to
+  errorMessage     String?
+  syncStartedAt    DateTime    @default(now())
+  syncCompletedAt  DateTime?
+  retryCount       Int         @default(0)
+  metadata         String?                       // JSON string for additional data
+  
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
 }

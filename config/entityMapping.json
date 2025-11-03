@@ -1,0 +1,127 @@
+{
+  "version": "1.0.0",
+  "description": "Entity Mapping Configuration between QuickBooks Online and GnuCash",
+  "mappings": {
+    "Class": {
+      "qbEntity": "Class",
+      "gcEntity": "Account",
+      "enabled": true,
+      "fieldMappings": {
+        "qbId": {
+          "gcField": "code",
+          "transform": "string",
+          "required": false
+        },
+        "name": {
+          "gcField": "name",
+          "transform": "string",
+          "required": true
+        },
+        "fullName": {
+          "gcField": "description",
+          "transform": "string",
+          "required": false
+        },
+        "isActive": {
+          "gcField": "placeholder",
+          "transform": "boolean_inverse",
+          "required": false,
+          "description": "Active in QB means NOT a placeholder in GnuCash"
+        }
+      },
+      "defaultValues": {
+        "type": "EQUITY",
+        "commodity": "USD"
+      }
+    },
+    "Account": {
+      "qbEntity": "Account",
+      "gcEntity": "Account",
+      "enabled": true,
+      "fieldMappings": {
+        "accountNumber": {
+          "gcField": "code",
+          "transform": "string",
+          "required": true
+        },
+        "holderName": {
+          "gcField": "name",
+          "transform": "string",
+          "required": true
+        },
+        "type": {
+          "gcField": "account_type",
+          "transform": "account_type_mapping",
+          "required": true,
+          "mappingRules": {
+            "SAVINGS": "BANK",
+            "CURRENT": "BANK",
+            "SALARY": "BANK",
+            "Fixed_deposit": "ASSET"
+          }
+        },
+        "balance": {
+          "gcField": "quantity",
+          "transform": "decimal",
+          "required": false
+        },
+        "isActive": {
+          "gcField": "placeholder",
+          "transform": "boolean_inverse",
+          "required": false
+        }
+      },
+      "defaultValues": {
+        "commodity": "USD",
+        "parent": "Assets"
+      }
+    },
+    "Taxation": {
+      "qbEntity": "TaxCode",
+      "gcEntity": "Account",
+      "enabled": true,
+      "fieldMappings": {
+        "title": {
+          "gcField": "name",
+          "transform": "string",
+          "required": true
+        },
+        "taxRate": {
+          "gcField": "description",
+          "transform": "percentage_to_string",
+          "required": false
+        },
+        "documentNumber": {
+          "gcField": "code",
+          "transform": "string",
+          "required": false
+        },
+        "isActive": {
+          "gcField": "placeholder",
+          "transform": "boolean_inverse",
+          "required": false
+        }
+      },
+      "defaultValues": {
+        "type": "LIABILITY",
+        "commodity": "USD",
+        "parent": "Liabilities:Tax"
+      }
+    }
+  },
+  "syncRules": {
+    "conflictResolution": "qb_wins",
+    "description": "When conflicts occur, QuickBooks data takes precedence",
+    "autoSync": false,
+    "syncDirection": "qb_to_gc",
+    "batchSize": 10,
+    "retryAttempts": 3
+  },
+  "gnucashConfig": {
+    "fileFormat": "xml",
+    "encoding": "utf-8",
+    "version": "2.0.0",
+    "defaultCurrency": "USD",
+    "organizationName": "Synced from QuickBooks Online"
+  }
+}

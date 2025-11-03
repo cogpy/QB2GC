@@ -17,6 +17,7 @@
     "axios": "^1.9.0",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
+    "gnucash": "^0.0.2",
     "google-proto-files": "^4.2.0",
     "mongoose": "^8.14.2",
     "node-quickbooks": "^2.0.46",

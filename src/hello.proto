@@ -196,3 +196,52 @@ message BulkCreateClassesResponse {
   repeated string ids = 1;
   string message = 2;
 }
+// GnuCash Sync Service
+service GnuCashSync {
+  // Sync a single class to GnuCash
+  rpc SyncClassToGnuCash (GnuCashSyncRequest) returns (GnuCashSyncResponse);
+  
+  // Batch sync classes to GnuCash
+  rpc BatchSyncClassesToGnuCash (stream GnuCashBatchRequest) returns (stream GnuCashBatchResponse);
+  
+  // Sync a single account to GnuCash
+  rpc SyncAccountToGnuCash (GnuCashSyncRequest) returns (GnuCashSyncResponse);
+  
+  // Batch sync accounts to GnuCash
+  rpc BatchSyncAccountsToGnuCash (stream GnuCashBatchRequest) returns (stream GnuCashBatchResponse);
+  
+  // Get sync statistics
+  rpc GetSyncStatistics (Empty) returns (SyncStatisticsResponse);
+}
+
+// GnuCash sync messages
+message GnuCashSyncRequest {
+  string classId = 1;
+  string accountId = 2;
+  int32 taxationId = 3;
+}
+
+message GnuCashSyncResponse {
+  bool success = 1;
+  string message = 2;
+  string gcAccountId = 3;
+  string data = 4;
+}
+
+message GnuCashBatchRequest {
+  string classId = 1;
+  string accountId = 2;
+  int32 taxationId = 3;
+}
+
+message GnuCashBatchResponse {
+  int32 total = 1;
+  int32 successful = 2;
+  int32 failed = 3;
+  string message = 4;
+}
+
+message SyncStatisticsResponse {
+  string message = 1;
+  string data = 2;
+}
