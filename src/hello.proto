@@ -251,3 +251,121 @@ message SyncStatisticsResponse {
 // - SyncClassToGnuCash: only use classId field
 // - SyncAccountToGnuCash: only use accountId field
 // This design allows for future entity types without breaking changes.
+
+// Universal Integration Service - Integrate ANY software system
+service UniversalIntegration {
+  // Sync entity from any system to universal model
+  rpc SyncToUniversal (UniversalSyncRequest) returns (UniversalSyncResponse);
+  
+  // Batch sync entities to universal model
+  rpc BatchSyncToUniversal (stream UniversalSyncRequest) returns (stream UniversalBatchResponse);
+  
+  // Map universal entity to target system
+  rpc MapToSystem (MapToSystemRequest) returns (MapToSystemResponse);
+  
+  // Sync universal entity to all configured systems
+  rpc SyncToAllSystems (SyncToAllRequest) returns (stream SyncToAllResponse);
+  
+  // Query universal entities
+  rpc QueryEntities (QueryEntitiesRequest) returns (QueryEntitiesResponse);
+  
+  // Get supported systems
+  rpc GetSupportedSystems (Empty) returns (SupportedSystemsResponse);
+  
+  // Get universal types
+  rpc GetUniversalTypes (Empty) returns (UniversalTypesResponse);
+  
+  // Get integration statistics
+  rpc GetIntegrationStatistics (Empty) returns (IntegrationStatisticsResponse);
+}
+
+// Universal integration messages
+message UniversalSyncRequest {
+  string sourceSystem = 1;         // e.g., "Salesforce", "QuickBooks", "SAP"
+  string entityType = 2;            // e.g., "Contact", "Account", "Order"
+  string sourceEntityId = 3;        // ID in source system
+  string sourceData = 4;            // JSON-encoded entity data
+}
+
+message UniversalSyncResponse {
+  bool success = 1;
+  string message = 2;
+  string universalEntityId = 3;
+  string universalType = 4;
+  string data = 5;                  // JSON-encoded universal entity
+}
+
+message UniversalBatchResponse {
+  int32 total = 1;
+  int32 successful = 2;
+  int32 failed = 3;
+  string message = 4;
+}
+
+message MapToSystemRequest {
+  string universalEntityId = 1;
+  string targetSystem = 2;          // e.g., "GnuCash", "Xero", "SAP"
+  string targetEntityType = 3;      // e.g., "Account", "Contact"
+}
+
+message MapToSystemResponse {
+  bool success = 1;
+  string message = 2;
+  string mappingId = 3;
+  string targetData = 4;            // JSON-encoded target system data
+}
+
+message SyncToAllRequest {
+  string universalEntityId = 1;
+}
+
+message SyncToAllResponse {
+  string targetSystem = 1;
+  string targetEntityType = 2;
+  bool success = 3;
+  string message = 4;
+}
+
+message QueryEntitiesRequest {
+  string universalType = 1;         // Optional filter
+  string sourceSystem = 2;          // Optional filter
+  string syncStatus = 3;            // Optional filter
+  int32 limit = 4;
+  int32 offset = 5;
+}
+
+message QueryEntitiesResponse {
+  string message = 1;
+  string data = 2;                  // JSON array of entities
+  int32 total = 3;
+}
+
+message SystemInfo {
+  string name = 1;
+  string displayName = 2;
+  string type = 3;
+  bool enabled = 4;
+  repeated string entities = 5;
+}
+
+message SupportedSystemsResponse {
+  repeated SystemInfo systems = 1;
+  int32 total = 2;
+}
+
+message UniversalTypeInfo {
+  string name = 1;
+  string description = 2;
+  repeated string coreFields = 3;
+  repeated string extendedFields = 4;
+}
+
+message UniversalTypesResponse {
+  repeated UniversalTypeInfo types = 1;
+  int32 total = 2;
+}
+
+message IntegrationStatisticsResponse {
+  string message = 1;
+  string data = 2;                  // JSON-encoded statistics
+}

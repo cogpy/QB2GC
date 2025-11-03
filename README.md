@@ -1,7 +1,32 @@
-# 📚 QuickBooks to GnuCash Sync Microservice (QB2GC)
+# 📚 Universal Integration Platform (QB2GC v2.0)
 
-This Node.js microservice syncs data between **QuickBooks Online**, a **local database** (via Prisma ORM), and **GnuCash** using **gRPC streaming**.  
-It receives multiple entity entries (Classes, Accounts, Taxations) through a gRPC stream, saves them to the database, syncs each to QuickBooks Online, and then syncs to GnuCash for local backup.
+**Formerly:** QuickBooks to GnuCash Sync  
+**Now:** Universal integration framework for **ANY software system**
+
+This Node.js microservice has evolved from a QuickBooks-GnuCash integration into a **universal integration platform** that can automatically sync data between **any software system** through a centralized universal data model.
+
+## 🌟 What's New in v2.0
+
+### 🌐 Universal Integration Framework
+
+The platform now supports **10+ major software systems** out of the box and can be extended to support **ANY system** through configuration:
+
+- **Accounting:** QuickBooks, GnuCash, Xero
+- **CRM:** Salesforce, HubSpot  
+- **ERP:** SAP
+- **E-Commerce:** Shopify
+- **Payment:** Stripe
+- **Productivity:** Microsoft 365, Slack
+
+**🎯 Key Innovation:** Define entities in **one system**, automatically sync to **all compatible systems** through universal entity types.
+
+### 11 Universal Entity Types
+
+- Person, Organization, Product, FinancialAccount
+- OrganizationalUnit, Order, Invoice, Transaction
+- Deal, TaxCode, Group
+
+**Learn more:** See [UNIVERSAL_INTEGRATION.md](./UNIVERSAL_INTEGRATION.md) for complete documentation.
 
 ---
 
@@ -14,11 +39,36 @@ It receives multiple entity entries (Classes, Accounts, Taxations) through a gRP
 - 💰 **GnuCash Integration** (for local desktop backup)
 - 📝 **Protocol Buffers** (`.proto`)
 - 🗂️ **Entity Mapping Configuration** (JSON-based)
+- 🌐 **Universal Schema Registry** (supports 10+ systems) ⭐ NEW
 
 ---
 
-## 🔁 Enhanced Data Flow
+## 🔁 Universal Data Flow
 
+```
+┌─────────────────────────────────────────────────────────┐
+│          ANY Source System (Salesforce, SAP, etc.)      │
+└────────────────────┬────────────────────────────────────┘
+                     │ gRPC API
+                     ▼
+┌─────────────────────────────────────────────────────────┐
+│         Universal Integration Layer                      │
+│  - Normalize to Universal Entity Types                  │
+│  - Store in Universal Entity Database                   │
+└────────────────────┬────────────────────────────────────┘
+                     │ Auto-sync to all compatible systems
+         ┌───────────┼───────────┐
+         ▼           ▼           ▼
+┌──────────────┐ ┌──────────────┐ ┌──────────────┐
+│  QuickBooks  │ │  Salesforce  │ │     SAP      │
+└──────────────┘ └──────────────┘ └──────────────┘
+         ▼           ▼           ▼
+┌──────────────┐ ┌──────────────┐ ┌──────────────┐
+│   GnuCash    │ │   HubSpot    │ │   Shopify    │
+└──────────────┘ └──────────────┘ └──────────────┘
+```
+
+**Traditional Flow (Still Supported):**
 ```
 Client gRPC Stream
     ⬇
@@ -39,48 +89,32 @@ Respond with Success Message & Created IDs
 
 ---
 
-## 🆕 GnuCash Integration Features
-
-### Entity Mapping Configuration
-
-The system uses a JSON-based configuration (`config/entityMapping.json`) to map QuickBooks entities to GnuCash format:
-
-- **Configurable field mappings** between QB and GnuCash
-- **Data transformation rules** (type conversions, formatting)
-- **Default values** for GnuCash-specific fields
-- **Sync rules** (conflict resolution, batch size, retry logic)
-
-### Sync Status Tracking
-
-Each entity (Class, Account, Taxation) now tracks:
-- `gcSyncStatus`: PENDING | IN_PROGRESS | SYNCED | FAILED
-- `gcSyncedAt`: Timestamp of last GnuCash sync
-- `gcAccountId`: GnuCash account ID if synced
-- `gcSyncError`: Error message if sync failed
-
-### GnuCash Sync Log
-
-All sync operations are logged in `GnuCashSyncLog` table:
-- Entity type and ID
-- Sync status and direction
-- Error messages
-- Retry count
-- Metadata (JSON)
-
----
-
 ## 🚀 Available gRPC Services
 
-### 1. Accounting Service
+### 1. Universal Integration Service ⭐ NEW
+- `SyncToUniversal` - Sync entity from ANY system to universal model
+- `BatchSyncToUniversal` - Batch sync entities
+- `MapToSystem` - Map universal entity to target system
+- `SyncToAllSystems` - Sync to all compatible systems automatically
+- `QueryEntities` - Query universal entities
+- `GetSupportedSystems` - List all supported systems
+- `GetUniversalTypes` - List all universal entity types
+- `GetIntegrationStatistics` - Get integration statistics
+
+### 2. Accounting Service
 - `CreateAccount` - Create and sync accounts
 - `CreateClass` - Create and sync classes (auto-syncs to GnuCash)
 
-### 2. TaxationService
+### 2. Accounting Service
+- `CreateAccount` - Create and sync accounts
+- `CreateClass` - Create and sync classes (auto-syncs to GnuCash)
+
+### 3. TaxationService
 - `CreateTaxations` - Create tax records
 - `GetTaxationById` - Retrieve tax record
 - `UpdateTaxations` - Update tax records
 
-### 3. GnuCashSync Service (NEW)
+### 4. GnuCashSync Service
 - `SyncClassToGnuCash` - Manually sync a single class
 - `BatchSyncClassesToGnuCash` - Batch sync multiple classes
 - `SyncAccountToGnuCash` - Manually sync a single account
@@ -89,7 +123,71 @@ All sync operations are logged in `GnuCashSyncLog` table:
 
 ---
 
-## 📄 Example Usage
+## 📄 Universal Integration Examples
+
+### Example 1: Sync Salesforce Contact to Universal Model
+
+```javascript
+// Sync a Salesforce contact
+const response = await client.SyncToUniversal({
+  sourceSystem: "Salesforce",
+  entityType: "Contact",
+  sourceEntityId: "003xx000004TmiH",
+  sourceData: JSON.stringify({
+    FirstName: "John",
+    LastName: "Doe",
+    Email: "john.doe@example.com",
+    Title: "VP of Sales"
+  })
+});
+
+// Result: Universal entity created
+// Type: Person
+// Can now be synced to HubSpot, Microsoft 365, Slack, etc.
+```
+
+### Example 2: Sync to All Compatible Systems
+
+```javascript
+// Automatically sync John Doe to ALL systems that support "Person" entities
+await client.SyncToAllSystems({
+  universalEntityId: response.universalEntityId
+});
+
+// John Doe is now in:
+// - Salesforce (source)
+// - HubSpot as Contact
+// - Microsoft 365 as User
+// - Slack as User
+// - Shopify as Customer
+// - Stripe as Customer
+```
+
+### Example 3: Query Universal Entities
+
+```javascript
+// Find all Person entities from Salesforce
+const entities = await client.QueryEntities({
+  universalType: "Person",
+  sourceSystem: "Salesforce",
+  limit: 100
+});
+```
+
+### Example 4: List Supported Systems
+
+```javascript
+// Get all supported systems
+const systems = await client.GetSupportedSystems({});
+
+// Returns: QuickBooks, Salesforce, SAP, Shopify, 
+//          HubSpot, Stripe, Xero, Microsoft 365, 
+//          Slack, GnuCash
+```
+
+---
+
+## 📄 Traditional QuickBooks-GnuCash Examples
 
 ### Creating a Class (Auto-syncs to QB & GnuCash)
 
