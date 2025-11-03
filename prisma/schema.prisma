@@ -214,3 +214,114 @@ model GnuCashSyncLog {
   createdAt        DateTime    @default(now())
   updatedAt        DateTime    @updatedAt
 }
+
+// Universal Entity Registry - Maps entities from any external system
+model UniversalEntity {
+  id                String             @id @default(uuid()) @db.Uuid
+  universalType     String                               // Person, Organization, Product, etc.
+  sourceSystem      String                               // QuickBooks, Salesforce, SAP, etc.
+  sourceEntityType  String                               // Original entity type in source system
+  sourceEntityId    String                               // ID in source system
+  
+  // Core universal fields (JSON-encoded)
+  coreData          String                               // JSON with universal core fields
+  extendedData      String?                              // JSON with additional fields
+  rawData           String?                              // Original raw data from source
+  
+  // Sync tracking
+  syncStatus        SyncStatus         @default(PENDING)
+  lastSyncedAt      DateTime?
+  syncError         String?
+  
+  // Metadata
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  isActive          Boolean            @default(true)
+  
+  // Relations
+  mappings          EntityMapping[]
+  syncLogs          UniversalSyncLog[]
+  
+  @@unique([sourceSystem, sourceEntityType, sourceEntityId])
+  @@index([universalType])
+  @@index([sourceSystem])
+}
+
+// Entity Mapping - Maps between entities across systems
+model EntityMapping {
+  id                  String           @id @default(uuid()) @db.Uuid
+  universalEntityId   String           @db.Uuid
+  universalEntity     UniversalEntity  @relation(fields: [universalEntityId], references: [id], onDelete: Cascade)
+  
+  targetSystem        String                               // System being mapped to
+  targetEntityType    String                               // Entity type in target system
+  targetEntityId      String?                              // ID in target system (null until created)
+  
+  mappingConfig       String                               // JSON with field mappings
+  syncStatus          SyncStatus       @default(PENDING)
+  lastSyncedAt        DateTime?
+  syncError           String?
+  
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+  
+  @@unique([universalEntityId, targetSystem, targetEntityType])
+  @@index([targetSystem])
+}
+
+// Universal Sync Log - Tracks all cross-system sync operations
+model UniversalSyncLog {
+  id                  String           @id @default(uuid()) @db.Uuid
+  universalEntityId   String?          @db.Uuid
+  universalEntity     UniversalEntity? @relation(fields: [universalEntityId], references: [id], onDelete: SetNull)
+  
+  operation           String                               // create, update, delete, sync
+  sourceSystem        String
+  targetSystem        String
+  
+  syncStatus          SyncStatus       @default(PENDING)
+  syncDirection       String                               // bidirectional, source_to_target, target_to_source
+  
+  errorMessage        String?
+  syncStartedAt       DateTime         @default(now())
+  syncCompletedAt     DateTime?
+  retryCount          Int              @default(0)
+  
+  metadata            String?                              // JSON with additional data
+  
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+  
+  @@index([sourceSystem])
+  @@index([targetSystem])
+  @@index([syncStatus])
+}
+
+// System Integration Config - Stores configuration for each integrated system
+model SystemIntegration {
+  id                String           @id @default(uuid()) @db.Uuid
+  systemName        String           @unique                // QuickBooks, Salesforce, etc.
+  systemType        String                                  // accounting, crm, erp, etc.
+  enabled           Boolean          @default(true)
+  
+  // Connection config (encrypted credentials)
+  connectionConfig  String                                  // JSON with API keys, endpoints, etc.
+  authType          String                                  // oauth2, api_key, basic, etc.
+  
+  // Sync settings
+  autoSync          Boolean          @default(false)
+  syncInterval      Int?                                    // Sync interval in minutes
+  batchSize         Int              @default(10)
+  retryAttempts     Int              @default(3)
+  
+  // Monitoring
+  lastSyncAt        DateTime?
+  syncEnabled       Boolean          @default(true)
+  healthStatus      String           @default("unknown")  // healthy, degraded, down
+  
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  
+  @@index([systemType])
+  @@index([enabled])
+}

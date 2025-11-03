@@ -1,0 +1,407 @@
+{
+  "version": "2.0.0",
+  "description": "Universal Schema Registry - Maps entities from all major software systems to the universal data model",
+  "systems": {
+    "QuickBooks": {
+      "displayName": "QuickBooks Online",
+      "type": "accounting",
+      "enabled": true,
+      "entities": {
+        "Class": {
+          "primaryKey": "qbId",
+          "universalType": "OrganizationalUnit",
+          "fields": {
+            "qbId": { "type": "string", "universal": "externalId" },
+            "name": { "type": "string", "universal": "name" },
+            "fullName": { "type": "string", "universal": "fullName" },
+            "isActive": { "type": "boolean", "universal": "isActive" }
+          }
+        },
+        "Account": {
+          "primaryKey": "qbId",
+          "universalType": "FinancialAccount",
+          "fields": {
+            "accountNumber": { "type": "string", "universal": "accountNumber" },
+            "holderName": { "type": "string", "universal": "name" },
+            "type": { "type": "enum", "universal": "accountType" },
+            "balance": { "type": "decimal", "universal": "balance" }
+          }
+        },
+        "Taxation": {
+          "primaryKey": "id",
+          "universalType": "TaxCode",
+          "fields": {
+            "title": { "type": "string", "universal": "name" },
+            "taxRate": { "type": "decimal", "universal": "rate" }
+          }
+        }
+      }
+    },
+    "GnuCash": {
+      "displayName": "GnuCash Desktop",
+      "type": "accounting",
+      "enabled": true,
+      "entities": {
+        "Account": {
+          "primaryKey": "id",
+          "universalType": "FinancialAccount",
+          "fields": {
+            "name": { "type": "string", "universal": "name" },
+            "code": { "type": "string", "universal": "accountNumber" },
+            "account_type": { "type": "string", "universal": "accountType" },
+            "description": { "type": "string", "universal": "description" }
+          }
+        }
+      }
+    },
+    "Salesforce": {
+      "displayName": "Salesforce CRM",
+      "type": "crm",
+      "enabled": true,
+      "entities": {
+        "Account": {
+          "primaryKey": "Id",
+          "universalType": "Organization",
+          "fields": {
+            "Id": { "type": "string", "universal": "externalId" },
+            "Name": { "type": "string", "universal": "name" },
+            "BillingAddress": { "type": "address", "universal": "primaryAddress" },
+            "Phone": { "type": "string", "universal": "phone" },
+            "Industry": { "type": "string", "universal": "industry" },
+            "AnnualRevenue": { "type": "decimal", "universal": "revenue" }
+          }
+        },
+        "Contact": {
+          "primaryKey": "Id",
+          "universalType": "Person",
+          "fields": {
+            "Id": { "type": "string", "universal": "externalId" },
+            "FirstName": { "type": "string", "universal": "firstName" },
+            "LastName": { "type": "string", "universal": "lastName" },
+            "Email": { "type": "string", "universal": "email" },
+            "Phone": { "type": "string", "universal": "phone" },
+            "Title": { "type": "string", "universal": "jobTitle" }
+          }
+        },
+        "Opportunity": {
+          "primaryKey": "Id",
+          "universalType": "Deal",
+          "fields": {
+            "Id": { "type": "string", "universal": "externalId" },
+            "Name": { "type": "string", "universal": "name" },
+            "Amount": { "type": "decimal", "universal": "value" },
+            "StageName": { "type": "string", "universal": "stage" },
+            "CloseDate": { "type": "date", "universal": "closeDate" },
+            "Probability": { "type": "decimal", "universal": "probability" }
+          }
+        }
+      }
+    },
+    "SAP": {
+      "displayName": "SAP ERP",
+      "type": "erp",
+      "enabled": true,
+      "entities": {
+        "BusinessPartner": {
+          "primaryKey": "BusinessPartner",
+          "universalType": "Organization",
+          "fields": {
+            "BusinessPartner": { "type": "string", "universal": "externalId" },
+            "BusinessPartnerName": { "type": "string", "universal": "name" },
+            "BusinessPartnerCategory": { "type": "string", "universal": "category" },
+            "Country": { "type": "string", "universal": "country" }
+          }
+        },
+        "SalesOrder": {
+          "primaryKey": "SalesOrder",
+          "universalType": "Order",
+          "fields": {
+            "SalesOrder": { "type": "string", "universal": "externalId" },
+            "SalesOrderType": { "type": "string", "universal": "orderType" },
+            "TotalNetAmount": { "type": "decimal", "universal": "totalAmount" },
+            "TransactionCurrency": { "type": "string", "universal": "currency" }
+          }
+        },
+        "Material": {
+          "primaryKey": "Material",
+          "universalType": "Product",
+          "fields": {
+            "Material": { "type": "string", "universal": "externalId" },
+            "MaterialDescription": { "type": "string", "universal": "name" },
+            "MaterialType": { "type": "string", "universal": "productType" },
+            "BaseUnit": { "type": "string", "universal": "unit" }
+          }
+        }
+      }
+    },
+    "Microsoft365": {
+      "displayName": "Microsoft 365",
+      "type": "productivity",
+      "enabled": true,
+      "entities": {
+        "User": {
+          "primaryKey": "id",
+          "universalType": "Person",
+          "fields": {
+            "id": { "type": "string", "universal": "externalId" },
+            "displayName": { "type": "string", "universal": "name" },
+            "mail": { "type": "string", "universal": "email" },
+            "jobTitle": { "type": "string", "universal": "jobTitle" },
+            "department": { "type": "string", "universal": "department" }
+          }
+        },
+        "Group": {
+          "primaryKey": "id",
+          "universalType": "OrganizationalUnit",
+          "fields": {
+            "id": { "type": "string", "universal": "externalId" },
+            "displayName": { "type": "string", "universal": "name" },
+            "description": { "type": "string", "universal": "description" }
+          }
+        }
+      }
+    },
+    "Shopify": {
+      "displayName": "Shopify",
+      "type": "ecommerce",
+      "enabled": true,
+      "entities": {
+        "Product": {
+          "primaryKey": "id",
+          "universalType": "Product",
+          "fields": {
+            "id": { "type": "string", "universal": "externalId" },
+            "title": { "type": "string", "universal": "name" },
+            "vendor": { "type": "string", "universal": "manufacturer" },
+            "product_type": { "type": "string", "universal": "productType" }
+          }
+        },
+        "Customer": {
+          "primaryKey": "id",
+          "universalType": "Person",
+          "fields": {
+            "id": { "type": "string", "universal": "externalId" },
+            "first_name": { "type": "string", "universal": "firstName" },
+            "last_name": { "type": "string", "universal": "lastName" },
+            "email": { "type": "string", "universal": "email" },
+            "phone": { "type": "string", "universal": "phone" }
+          }
+        },
+        "Order": {
+          "primaryKey": "id",
+          "universalType": "Order",
+          "fields": {
+            "id": { "type": "string", "universal": "externalId" },
+            "order_number": { "type": "string", "universal": "orderNumber" },
+            "total_price": { "type": "decimal", "universal": "totalAmount" },
+            "currency": { "type": "string", "universal": "currency" },
+            "financial_status": { "type": "string", "universal": "paymentStatus" }
+          }
+        }
+      }
+    },
+    "HubSpot": {
+      "displayName": "HubSpot CRM",
+      "type": "crm",
+      "enabled": true,
+      "entities": {
+        "Company": {
+          "primaryKey": "id",
+          "universalType": "Organization",
+          "fields": {
+            "id": { "type": "string", "universal": "externalId" },
+            "name": { "type": "string", "universal": "name" },
+            "domain": { "type": "string", "universal": "website" },
+            "industry": { "type": "string", "universal": "industry" },
+            "annualrevenue": { "type": "decimal", "universal": "revenue" }
+          }
+        },
+        "Contact": {
+          "primaryKey": "id",
+          "universalType": "Person",
+          "fields": {
+            "id": { "type": "string", "universal": "externalId" },
+            "firstname": { "type": "string", "universal": "firstName" },
+            "lastname": { "type": "string", "universal": "lastName" },
+            "email": { "type": "string", "universal": "email" },
+            "jobtitle": { "type": "string", "universal": "jobTitle" }
+          }
+        }
+      }
+    },
+    "Stripe": {
+      "displayName": "Stripe Payments",
+      "type": "payment",
+      "enabled": true,
+      "entities": {
+        "Customer": {
+          "primaryKey": "id",
+          "universalType": "Person",
+          "fields": {
+            "id": { "type": "string", "universal": "externalId" },
+            "name": { "type": "string", "universal": "name" },
+            "email": { "type": "string", "universal": "email" },
+            "phone": { "type": "string", "universal": "phone" }
+          }
+        },
+        "Charge": {
+          "primaryKey": "id",
+          "universalType": "Transaction",
+          "fields": {
+            "id": { "type": "string", "universal": "externalId" },
+            "amount": { "type": "decimal", "universal": "amount" },
+            "currency": { "type": "string", "universal": "currency" },
+            "status": { "type": "string", "universal": "status" },
+            "created": { "type": "timestamp", "universal": "timestamp" }
+          }
+        }
+      }
+    },
+    "Xero": {
+      "displayName": "Xero Accounting",
+      "type": "accounting",
+      "enabled": true,
+      "entities": {
+        "Contact": {
+          "primaryKey": "ContactID",
+          "universalType": "Organization",
+          "fields": {
+            "ContactID": { "type": "string", "universal": "externalId" },
+            "Name": { "type": "string", "universal": "name" },
+            "EmailAddress": { "type": "string", "universal": "email" },
+            "BankAccountDetails": { "type": "string", "universal": "bankAccount" }
+          }
+        },
+        "Invoice": {
+          "primaryKey": "InvoiceID",
+          "universalType": "Invoice",
+          "fields": {
+            "InvoiceID": { "type": "string", "universal": "externalId" },
+            "InvoiceNumber": { "type": "string", "universal": "invoiceNumber" },
+            "Total": { "type": "decimal", "universal": "totalAmount" },
+            "Status": { "type": "string", "universal": "status" }
+          }
+        }
+      }
+    },
+    "Slack": {
+      "displayName": "Slack",
+      "type": "communication",
+      "enabled": true,
+      "entities": {
+        "User": {
+          "primaryKey": "id",
+          "universalType": "Person",
+          "fields": {
+            "id": { "type": "string", "universal": "externalId" },
+            "name": { "type": "string", "universal": "name" },
+            "real_name": { "type": "string", "universal": "fullName" },
+            "profile.email": { "type": "string", "universal": "email" },
+            "profile.title": { "type": "string", "universal": "jobTitle" }
+          }
+        },
+        "Channel": {
+          "primaryKey": "id",
+          "universalType": "Group",
+          "fields": {
+            "id": { "type": "string", "universal": "externalId" },
+            "name": { "type": "string", "universal": "name" },
+            "topic": { "type": "string", "universal": "description" }
+          }
+        }
+      }
+    }
+  },
+  "universalTypes": {
+    "Person": {
+      "description": "Individual human being",
+      "coreFields": ["externalId", "name", "firstName", "lastName", "email", "phone", "jobTitle"],
+      "extendedFields": ["department", "manager", "birthDate", "address"]
+    },
+    "Organization": {
+      "description": "Business entity or company",
+      "coreFields": ["externalId", "name", "website", "industry", "revenue"],
+      "extendedFields": ["primaryAddress", "phone", "employees", "founded"]
+    },
+    "Product": {
+      "description": "Product or service offering",
+      "coreFields": ["externalId", "name", "productType", "unit"],
+      "extendedFields": ["manufacturer", "price", "sku", "description"]
+    },
+    "FinancialAccount": {
+      "description": "Financial account in accounting system",
+      "coreFields": ["externalId", "name", "accountNumber", "accountType", "balance"],
+      "extendedFields": ["currency", "description", "isActive"]
+    },
+    "OrganizationalUnit": {
+      "description": "Department, division, or organizational grouping",
+      "coreFields": ["externalId", "name", "fullName"],
+      "extendedFields": ["description", "parent", "isActive"]
+    },
+    "Order": {
+      "description": "Sales or purchase order",
+      "coreFields": ["externalId", "orderNumber", "totalAmount", "currency"],
+      "extendedFields": ["status", "customer", "items", "orderDate"]
+    },
+    "Invoice": {
+      "description": "Invoice or bill",
+      "coreFields": ["externalId", "invoiceNumber", "totalAmount", "status"],
+      "extendedFields": ["dueDate", "customer", "items", "currency"]
+    },
+    "Transaction": {
+      "description": "Financial transaction",
+      "coreFields": ["externalId", "amount", "currency", "timestamp"],
+      "extendedFields": ["status", "description", "reference", "account"]
+    },
+    "Deal": {
+      "description": "Sales opportunity or deal",
+      "coreFields": ["externalId", "name", "value", "stage"],
+      "extendedFields": ["closeDate", "probability", "owner", "account"]
+    },
+    "TaxCode": {
+      "description": "Tax code or taxation rule",
+      "coreFields": ["externalId", "name", "rate"],
+      "extendedFields": ["description", "jurisdiction", "effectiveDate"]
+    },
+    "Group": {
+      "description": "Grouping or team",
+      "coreFields": ["externalId", "name"],
+      "extendedFields": ["description", "members", "owner"]
+    }
+  },
+  "transformations": {
+    "string": {
+      "description": "Direct string conversion"
+    },
+    "boolean": {
+      "description": "Boolean value"
+    },
+    "boolean_inverse": {
+      "description": "Inverse boolean value"
+    },
+    "decimal": {
+      "description": "Decimal/float number"
+    },
+    "integer": {
+      "description": "Integer number"
+    },
+    "date": {
+      "description": "Date value (ISO 8601)"
+    },
+    "timestamp": {
+      "description": "Date-time value (ISO 8601)"
+    },
+    "address": {
+      "description": "Address object with street, city, state, zip, country"
+    },
+    "enum": {
+      "description": "Enumerated value with mapping"
+    },
+    "percentage_to_string": {
+      "description": "Convert decimal to percentage string"
+    },
+    "amount_to_cents": {
+      "description": "Convert decimal amount to cents (integer)"
+    }
+  }
+}

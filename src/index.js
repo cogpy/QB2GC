@@ -14,6 +14,17 @@ import {
   BatchSyncAccountsToGnuCash,
   GetSyncStatistics
 } from './controllers/GnuCashSync.js';
+import {
+  initializeUniversalIntegration,
+  SyncToUniversal,
+  BatchSyncToUniversal,
+  MapToSystem,
+  SyncToAllSystems,
+  QueryEntities,
+  GetSupportedSystems,
+  GetUniversalTypes,
+  GetIntegrationStatistics
+} from './controllers/UniversalIntegration.js';
 
 dotenv.config()
 
@@ -53,13 +64,16 @@ const idGetter = (call, callback) => {
   callback(null, { details: { name: user.name, age: user.age } });
 };
 
-// Initialize GnuCash service
+// Initialize GnuCash service and Universal Integration service
 (async () => {
   try {
     await initializeGnuCashService();
     console.log('✅ GnuCash Sync Service initialized');
+    
+    await initializeUniversalIntegration();
+    console.log('✅ Universal Integration Service initialized');
   } catch (error) {
-    console.error('❌ Failed to initialize GnuCash Sync Service:', error);
+    console.error('❌ Failed to initialize services:', error);
   }
 })();
 
@@ -89,6 +103,18 @@ server.addService(helloPackage.GnuCashSync.service, {
   GetSyncStatistics
 });
 
+// Add Universal Integration Service
+server.addService(helloPackage.UniversalIntegration.service, {
+  SyncToUniversal,
+  BatchSyncToUniversal,
+  MapToSystem,
+  SyncToAllSystems,
+  QueryEntities,
+  GetSupportedSystems,
+  GetUniversalTypes,
+  GetIntegrationStatistics
+});
+
 // Start the server
 server.bindAsync('127.0.0.1:50051', grpc.ServerCredentials.createInsecure(), () => {
   console.log('gRPC server running on port 50051');
@@ -97,5 +123,11 @@ server.bindAsync('127.0.0.1:50051', grpc.ServerCredentials.createInsecure(), () 
   console.log('  - TaxationService');
   console.log('  - Accounting');
   console.log('  - GnuCashSync');
+  console.log('  - UniversalIntegration ⭐ (NEW)');
+  console.log('');
+  console.log('🌐 Universal Integration supports:');
+  console.log('  - QuickBooks, GnuCash, Salesforce, SAP, Microsoft 365');
+  console.log('  - Shopify, HubSpot, Stripe, Xero, Slack');
+  console.log('  - And growing! Check GetSupportedSystems for full list');
 });
 
